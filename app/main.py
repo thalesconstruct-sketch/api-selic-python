@@ -3,6 +3,7 @@ from pydantic import BaseModel, EmailStr
 import psycopg2
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
@@ -83,18 +84,39 @@ def listar_selic(
 
 @app.get("/selic/{data}")
 def buscar_selic(data: str):
+
+    try:
+        if "/" in data:
+            data_convertida = datetime.strptime(
+                data,
+                "%d/%m/%Y"
+            ).date()
+        else:
+            data_convertida = datetime.strptime(
+                data,
+                "%Y-%m-%d"
+            ).date()
+
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Data inválida. Use DD/MM/YYYY ou YYYY-MM-DD"
+        )
+
     conn = conectar_banco()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT data, valor FROM selic WHERE data = %s;",
-        (data,)
-    )
+    try:
+        cursor.execute(
+            "SELECT data, valor FROM selic WHERE data = %s;",
+            (data_convertida,)
+        )
 
-    registro = cursor.fetchone()
+        registro = cursor.fetchone()
 
-    cursor.close()
-    conn.close()
+    finally:
+        cursor.close()
+        conn.close()
 
     if registro is None:
         return {"erro": "Data não encontrada"}
@@ -132,6 +154,7 @@ def criar_usuario(usuario: UsuarioCreate):
 
     except psycopg2.errors.UniqueViolation:
         conn.rollback()
+
         raise HTTPException(
             status_code=409,
             detail="Email já cadastrado"
