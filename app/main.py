@@ -38,48 +38,88 @@ def ola():
 @app.get("/selic")
 def listar_selic(
     pagina: int = Query(1, ge=1),
-    limite: int = Query(10, ge=1, le=100)
+    limite: int = Query(10, ge=1, le=100),
+    data: str | None = None
 ):
     conn = conectar_banco()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM selic;")
-    total = cursor.fetchone()[0]
+    try:
+        # Se uma data foi informada, busca apenas aquele registro
+        if data is not None:
 
-    offset = (pagina - 1) * limite
+            try:
+                if "/" in data:
+                    data_convertida = datetime.strptime(
+                        data,
+                        "%d/%m/%Y"
+                    ).date()
+                else:
+                    data_convertida = datetime.strptime(
+                        data,
+                        "%Y-%m-%d"
+                    ).date()
 
-    cursor.execute(
-        """
-        SELECT data, valor
-        FROM selic
-        ORDER BY data DESC
-        LIMIT %s OFFSET %s;
-        """,
-        (limite, offset)
-    )
+            except ValueError:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Data inválida. Use DD/MM/YYYY ou YYYY-MM-DD"
+                )
 
-    registros = cursor.fetchall()
+            cursor.execute(
+                "SELECT data, valor FROM selic WHERE data = %s;",
+                (data_convertida,)
+            )
 
-    cursor.close()
-    conn.close()
+            registro = cursor.fetchone()
 
-    dados = [
-        {
-            "data": str(data),
-            "valor": float(valor)
+            if registro is None:
+                return {"erro": "Data não encontrada"}
+
+            return {
+                "data": str(registro[0]),
+                "valor": float(registro[1])
+            }
+
+        # Consulta normal com paginação
+        cursor.execute("SELECT COUNT(*) FROM selic;")
+        total = cursor.fetchone()[0]
+
+        offset = (pagina - 1) * limite
+
+        cursor.execute(
+            """
+            SELECT data, valor
+            FROM selic
+            ORDER BY data DESC
+            LIMIT %s OFFSET %s;
+            """,
+            (limite, offset)
+        )
+
+        registros = cursor.fetchall()
+
+        dados = [
+            {
+                "data": str(data),
+                "valor": float(valor)
+            }
+            for data, valor in registros
+        ]
+
+        total_paginas = (total + limite - 1) // limite
+
+        return {
+            "pagina": pagina,
+            "limite": limite,
+            "total": total,
+            "total_paginas": total_paginas,
+            "dados": dados
         }
-        for data, valor in registros
-    ]
 
-    total_paginas = (total + limite - 1) // limite
-
-    return {
-        "pagina": pagina,
-        "limite": limite,
-        "total": total,
-        "total_paginas": total_paginas,
-        "dados": dados
-    }
+    finally:
+        cursor.close()
+        conn.close()
 
 
 @app.get("/selic/{data}")
