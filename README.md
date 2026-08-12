@@ -1,356 +1,81 @@
 # API de Consulta da Taxa Selic
 
-API desenvolvida em Python com FastAPI para disponibilizar dados históricos da taxa Selic, armazenados em um banco de dados PostgreSQL.
+API REST desenvolvida em Python com FastAPI para consulta de dados históricos da taxa Selic, armazenados em PostgreSQL.
 
-O projeto possui um processo de atualização dos dados utilizando a API do Banco Central do Brasil (BCB), permitindo consultar os valores da taxa Selic através de endpoints HTTP.
+O projeto utiliza Docker para facilitar a configuração e execução dos serviços e possui integração com a API do Banco Central do Brasil para obtenção dos dados da Selic.
 
-## 🚀 Tecnologias
+## Tecnologias
 
 * Python
 * FastAPI
 * PostgreSQL
 * Docker
 * Docker Compose
-* Requests
+* psycopg2
 * Pydantic
 * Git
 * GitHub
-* API do Banco Central do Brasil (BCB)
+* API do Banco Central do Brasil
 
-## 📌 Objetivo do Projeto
+## Funcionalidades
 
-O objetivo deste projeto é desenvolver uma API capaz de:
+* Consulta da taxa Selic
+* Consulta de dados históricos
+* Consulta da Selic por data
+* Suporte a diferentes formatos de data
+* Paginação dos resultados
+* Cadastro de usuários
+* Validação de e-mail
+* Tratamento de e-mails duplicados
+* Documentação automática com Swagger/OpenAPI
+* Banco de dados PostgreSQL
+* Ambiente containerizado com Docker
 
-* Consultar dados históricos da taxa Selic;
-* Armazenar os dados em um banco PostgreSQL;
-* Buscar dados atualizados diretamente da API do Banco Central;
-* Disponibilizar os dados através de endpoints REST;
-* Utilizar Docker para facilitar a configuração do ambiente;
-* Praticar conceitos de desenvolvimento de APIs, bancos de dados e integração entre sistemas.
-
-## 🏗️ Arquitetura
-
-O projeto possui a seguinte estrutura:
-
-```text
-                    ┌─────────────────────┐
-                    │   Banco Central     │
-                    │       do Brasil     │
-                    └──────────┬──────────┘
-                               │
-                               │ API
-                               ▼
-                    ┌─────────────────────┐
-                    │       Python        │
-                    │      FastAPI        │
-                    └──────────┬──────────┘
-                               │
-                               │ SQL
-                               ▼
-                    ┌─────────────────────┐
-                    │     PostgreSQL      │
-                    │      Database       │
-                    └─────────────────────┘
-```
-
-A aplicação utiliza o FastAPI como camada responsável por receber as requisições e disponibilizar os dados.
-
-O PostgreSQL é utilizado para armazenar os registros da taxa Selic.
-
-A API do Banco Central é utilizada como fonte externa para obtenção dos dados.
-
-## 📂 Estrutura do Projeto
+## Estrutura do projeto
 
 ```text
 projeto-docker/
 │
 ├── app/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── database.py
-│   ├── models.py
-│   └── schemas.py
-│
-├── scripts/
-│   └── atualizar_selic.py
+│   └── main.py
 │
 ├── .env
 ├── .gitignore
 ├── Dockerfile
 ├── docker-compose.yml
-├── requirements.txt
-└── README.md
+├── README.md
+└── requirements.txt
 ```
 
-### Principais arquivos
+## Como executar
 
-#### `app/main.py`
+### 1. Clonar o repositório
 
-Arquivo principal da aplicação FastAPI.
-
-É responsável por inicializar a API e disponibilizar os endpoints.
-
-#### `app/database.py`
-
-Responsável pela configuração da conexão com o PostgreSQL.
-
-#### `app/models.py`
-
-Contém os modelos utilizados para representar as tabelas do banco de dados.
-
-#### `app/schemas.py`
-
-Define os schemas utilizados pela API para validação e estruturação dos dados.
-
-#### `scripts/atualizar_selic.py`
-
-Script responsável por consultar os dados da API do Banco Central e atualizar o banco de dados.
-
-#### `Dockerfile`
-
-Define a imagem utilizada para executar a aplicação Python.
-
-#### `docker-compose.yml`
-
-Responsável por orquestrar os containers da aplicação e do PostgreSQL.
-
-#### `.env`
-
-Arquivo utilizado para armazenar configurações e variáveis de ambiente, como credenciais do banco de dados.
-
-> O arquivo `.env` não deve ser enviado para o GitHub.
-
-## 🐘 Banco de Dados
-
-O projeto utiliza PostgreSQL para armazenamento dos dados.
-
-A tabela principal possui informações relacionadas à taxa Selic.
-
-Exemplo de estrutura:
-
-```sql
-CREATE TABLE selic (
-    id SERIAL PRIMARY KEY,
-    data DATE NOT NULL,
-    valor NUMERIC(10, 2) NOT NULL
-);
+```bash
+git clone https://github.com/thalesconstruct-sketch/api-selic-python.git
 ```
 
-### Exemplo de registro
+### 2. Entrar no projeto
 
-```text
-id | data       | valor
----+------------+------
-1  | 2026-01-01 | 15.00
+```bash
+cd api-selic-python
 ```
 
-## 🔌 API
+### 3. Subir os containers
 
-A aplicação é desenvolvida utilizando o FastAPI.
+```bash
+docker compose up -d --build
+```
 
-Após iniciar o projeto, a API pode ser acessada localmente através de:
+A aplicação será executada na porta:
 
 ```text
 http://localhost:8000
 ```
 
-### Documentação automática
+## Documentação da API
 
-O FastAPI disponibiliza uma interface interativa para testar os endpoints.
-
-Swagger:
-
-```text
-http://localhost:8000/docs
-```
-
-Redoc:
-
-```text
-http://localhost:8000/redoc
-```
-
-## 📡 Endpoints
-
-### Verificar funcionamento da API
-
-```http
-GET /
-```
-
-Exemplo de resposta:
-
-```json
-{
-  "mensagem": "API da Taxa Selic funcionando!"
-}
-```
-
-### Consultar dados da Selic
-
-```http
-GET /selic
-```
-
-Retorna os registros disponíveis no banco de dados.
-
-Exemplo:
-
-```json
-[
-  {
-    "id": 1,
-    "data": "2026-01-01",
-    "valor": 15.00
-  }
-]
-```
-
-## 🔄 Atualização dos Dados
-
-O projeto possui um processo de atualização que consulta a API do Banco Central do Brasil.
-
-O fluxo funciona da seguinte maneira:
-
-```text
-Banco Central
-      │
-      ▼
-API do BCB
-      │
-      ▼
-Script Python
-      │
-      ▼
-Tratamento dos dados
-      │
-      ▼
-PostgreSQL
-      │
-      ▼
-FastAPI
-      │
-      ▼
-Usuário
-```
-
-Dessa forma, os dados externos podem ser coletados e posteriormente disponibilizados pela API desenvolvida no projeto.
-
-## 🐳 Docker
-
-O projeto utiliza Docker para facilitar a configuração do ambiente.
-
-Os principais serviços são:
-
-```text
-┌─────────────────────────┐
-│       Aplicação         │
-│      FastAPI/Python     │
-│       Port: 8000        │
-└────────────┬────────────┘
-             │
-             │
-┌────────────▼────────────┐
-│       PostgreSQL        │
-│       Port: 5432        │
-└─────────────────────────┘
-```
-
-### Subir os containers
-
-Dentro da pasta do projeto:
-
-```bash
-docker compose up -d
-```
-
-### Verificar os containers
-
-```bash
-docker compose ps
-```
-
-### Visualizar os logs
-
-```bash
-docker compose logs
-```
-
-Para visualizar os logs da aplicação:
-
-```bash
-docker compose logs app
-```
-
-### Parar os containers
-
-```bash
-docker compose down
-```
-
-## ⚙️ Configuração
-
-Crie um arquivo `.env` na raiz do projeto.
-
-Exemplo:
-
-```env
-POSTGRES_DB=minha_api
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_HOST=db
-POSTGRES_PORT=5432
-```
-
-As informações utilizadas devem ser ajustadas de acordo com a configuração do ambiente.
-
-## 📦 Instalação das Dependências
-
-As dependências do projeto estão listadas no arquivo:
-
-```text
-requirements.txt
-```
-
-Exemplo:
-
-```text
-fastapi
-uvicorn
-psycopg2-binary
-requests
-python-dotenv
-```
-
-Caso esteja executando o projeto fora do Docker, as dependências podem ser instaladas utilizando:
-
-```bash
-pip install -r requirements.txt
-```
-
-## ▶️ Executando a Aplicação
-
-Com Docker:
-
-```bash
-docker compose up -d
-```
-
-Depois de iniciar os containers, acesse:
-
-```text
-http://localhost:8000
-```
-
-Para acessar a documentação:
-
-```text
-http://localhost:8000/docs
-```
-
-## 🧪 Testando a API
-
-A API pode ser testada diretamente através do Swagger.
+A API possui documentação automática através do Swagger.
 
 Acesse:
 
@@ -358,104 +83,355 @@ Acesse:
 http://localhost:8000/docs
 ```
 
-Depois selecione um endpoint, clique em:
+Também é possível acessar o schema OpenAPI:
 
 ```text
-Try it out
+http://localhost:8000/openapi.json
 ```
 
-e execute a requisição.
+## Endpoints
 
-Também é possível utilizar ferramentas como:
+### GET /
 
-* Postman
-* Insomnia
-* cURL
-* Navegador
+Verifica se a API está funcionando.
 
-## 🔐 Variáveis de Ambiente
+Exemplo:
 
-As informações sensíveis do projeto devem ser armazenadas através de variáveis de ambiente.
+```http
+GET /
+```
 
-O arquivo `.env` deve estar presente no `.gitignore`.
+Resposta:
 
-Exemplo de `.gitignore`:
+```json
+{
+  "mensagem": "Olá! Minha API está funcionando!"
+}
+```
+
+---
+
+### GET /ola
+
+Endpoint simples de teste.
+
+Exemplo:
+
+```http
+GET /ola
+```
+
+Resposta:
+
+```json
+{
+  "mensagem": "Olá!"
+}
+```
+
+---
+
+### GET /selic
+
+Lista os registros históricos da taxa Selic.
+
+Exemplo:
+
+```http
+GET /selic
+```
+
+Resposta:
+
+```json
+{
+  "pagina": 1,
+  "limite": 10,
+  "total": 6683,
+  "total_paginas": 669,
+  "dados": [
+    {
+      "data": "2026-08-11",
+      "valor": 13.9
+    },
+    {
+      "data": "2026-08-10",
+      "valor": 13.9
+    }
+  ]
+}
+```
+
+### Paginação
+
+É possível controlar a página e a quantidade de registros retornados.
+
+Exemplo:
+
+```http
+GET /selic?pagina=2&limite=20
+```
+
+Parâmetros:
+
+| Parâmetro | Tipo    | Descrição                          | Valor padrão |
+| --------- | ------- | ---------------------------------- | ------------ |
+| pagina    | integer | Número da página                   | 1            |
+| limite    | integer | Quantidade de registros por página | 10           |
+| data      | string  | Data específica para consulta      | opcional     |
+
+O limite máximo permitido é de 100 registros por página.
+
+---
+
+### GET /selic?data=
+
+Permite consultar a taxa Selic utilizando uma data específica.
+
+A API aceita os formatos:
 
 ```text
-.env
-.venv/
-__pycache__/
-*.pyc
+DD/MM/YYYY
 ```
 
-Isso evita que credenciais e arquivos desnecessários sejam enviados para o GitHub.
+ou:
 
-## 📈 Possíveis Melhorias
+```text
+YYYY-MM-DD
+```
 
-O projeto pode ser expandido futuramente com:
+#### Formato brasileiro
 
-* [ ] Endpoint para consultar a Selic por período;
-* [ ] Endpoint para consultar um registro específico;
-* [ ] Filtros por data;
-* [ ] Paginação dos resultados;
-* [ ] Melhor tratamento de erros;
-* [ ] Testes automatizados;
-* [ ] Integração contínua com GitHub Actions;
-* [ ] Logs da aplicação;
-* [ ] Autenticação da API;
-* [ ] Monitoramento;
-* [ ] Agendamento automático da atualização dos dados;
-* [ ] Deploy em ambiente cloud;
-* [ ] Criação de dashboard para visualização dos dados.
+```http
+GET /selic?data=11/08/2026
+```
 
-## 🎯 Conceitos Praticados
+Resposta:
 
-Este projeto foi desenvolvido com foco no aprendizado e aplicação prática de conceitos como:
+```json
+{
+  "data": "2026-08-11",
+  "valor": 13.9
+}
+```
 
-* Desenvolvimento de APIs REST;
-* Python;
-* FastAPI;
-* PostgreSQL;
-* SQL;
-* Integração com APIs externas;
-* Docker;
-* Docker Compose;
-* Variáveis de ambiente;
-* Git;
-* GitHub;
-* Estruturação de aplicações;
-* Comunicação entre serviços;
-* Persistência de dados.
+#### Formato ISO
 
-## 💼 Aplicação Profissional
+```http
+GET /selic?data=2026-08-11
+```
 
-O projeto simula uma situação comum no desenvolvimento de sistemas:
+Resposta:
 
-> Uma aplicação precisa consumir dados de uma fonte externa, processar essas informações, armazená-las em um banco de dados e disponibilizá-las através de uma API.
+```json
+{
+  "data": "2026-08-11",
+  "valor": 13.9
+}
+```
 
-Esse fluxo é encontrado em diversos sistemas corporativos que trabalham com integração entre serviços, APIs e bancos de dados.
+Caso a data não exista:
 
-## 👨‍💻 Autor
+```json
+{
+  "erro": "Data não encontrada"
+}
+```
 
-**Thales Lopes Oliveira da Silva**
+---
 
-Estudante de Análise e Desenvolvimento de Sistemas.
+### GET /selic/{data}
 
-Interesses:
+Também é possível consultar uma data diretamente pela URL.
 
-* Desenvolvimento de Software
-* Backend
-* APIs
-* Banco de Dados
+Exemplo:
+
+```http
+GET /selic/2026-08-11
+```
+
+Resposta:
+
+```json
+{
+  "data": "2026-08-11",
+  "valor": 13.9
+}
+```
+
+> Para datas no formato `DD/MM/YYYY`, recomenda-se utilizar o parâmetro `?data=`, pois o caractere `/` possui função especial na estrutura da URL.
+
+---
+
+### POST /usuarios
+
+Cria um novo usuário no banco de dados.
+
+Exemplo:
+
+```http
+POST /usuarios
+```
+
+Body:
+
+```json
+{
+  "nome": "Thales",
+  "email": "thales@email.com"
+}
+```
+
+Resposta:
+
+```json
+{
+  "id": 1,
+  "nome": "Thales",
+  "email": "thales@email.com"
+}
+```
+
+O campo `email` é validado utilizando Pydantic.
+
+Caso o e-mail já esteja cadastrado, a API retorna:
+
+```text
+409 Conflict
+```
+
+Com a mensagem:
+
+```json
+{
+  "detail": "Email já cadastrado"
+}
+```
+
+## Banco de dados
+
+O projeto utiliza PostgreSQL para armazenamento dos dados.
+
+A tabela principal utilizada para consulta da Selic possui informações como:
+
+```text
+data
+valor
+```
+
+Os dados são organizados por data em ordem decrescente nas consultas paginadas.
+
+## Docker
+
+O projeto utiliza Docker Compose para executar os serviços da aplicação.
+
+Serviços principais:
+
+```text
+API
+PostgreSQL
+```
+
+Para verificar os containers em execução:
+
+```bash
+docker ps
+```
+
+Para parar os containers:
+
+```bash
+docker compose down
+```
+
+Para iniciar novamente:
+
+```bash
+docker compose up -d
+```
+
+Para reconstruir a aplicação após alterações no código:
+
+```bash
+docker compose up -d --build
+```
+
+## Variáveis de ambiente
+
+As configurações de conexão com o PostgreSQL são armazenadas através de variáveis de ambiente.
+
+Exemplo:
+
+```env
+POSTGRES_HOST=banco
+POSTGRES_DB=nome_do_banco
+POSTGRES_USER=usuario
+POSTGRES_PASSWORD=senha
+POSTGRES_PORT=5432
+```
+
+As credenciais reais não devem ser versionadas no GitHub.
+
+## Testando a API
+
+Exemplo utilizando cURL:
+
+### Consultar Selic
+
+```bash
+curl http://localhost:8000/selic
+```
+
+### Consultar por data
+
+```bash
+curl "http://localhost:8000/selic?data=11/08/2026"
+```
+
+### Consultar utilizando formato ISO
+
+```bash
+curl "http://localhost:8000/selic?data=2026-08-11"
+```
+
+### Consultar diretamente pela rota
+
+```bash
+curl http://localhost:8000/selic/2026-08-11
+```
+
+## Git e GitHub
+
+O projeto utiliza Git para controle de versão e está hospedado no GitHub.
+
+Repositório:
+
+[https://github.com/thalesconstruct-sketch/api-selic-python](https://github.com/thalesconstruct-sketch/api-selic-python)
+
+Principais conceitos utilizados:
+
+* Git
+* Branch `main`
+* Commits
+* GitHub
+* Git push
+* Git pull
+* Versionamento de código
+
+## Objetivo do projeto
+
+Este projeto foi desenvolvido com o objetivo de praticar e demonstrar conhecimentos em:
+
+* Desenvolvimento de APIs REST
 * Python
-* Java
-* Cloud
-* DevOps
+* FastAPI
+* Bancos de dados relacionais
+* PostgreSQL
+* Docker
+* Integração com APIs externas
+* Tratamento e validação de dados
+* Paginação
+* Git e GitHub
+* Documentação de APIs
 
-GitHub:
-
-[https://github.com/thalesconstruct-sketch](https://github.com/thalesconstruct-sketch)
-
-## 📄 Licença
-
-Este projeto foi desenvolvido para fins educacionais e de portfólio.
+O projeto também serve como base para estudos de desenvolvimento backend e práticas relacionadas a DevOps.
